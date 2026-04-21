@@ -1,0 +1,568 @@
+--[[
+    🎮 LUCKY HUB - SCRIPT PREMIUM
+    Criado por: Elso ADM
+    Store Lucky - Não tente vender
+    Compatível com PC e Mobile
+--]]
+
+-- Aguarda 1 segundo antes de iniciar
+task.wait(1)
+
+-- Serviços
+local player = game:GetService("Players").LocalPlayer
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Variáveis de estado
+local habilidadeOn = false
+local estiloOn = false
+local yenOn = false
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "LuckyHub"
+gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Função de notificação elegante
+local function notify(mensagem, duracao)
+    duracao = duracao or 2
+    
+    local notifFrame = Instance.new("Frame")
+    notifFrame.Size = UDim2.new(0, 200, 0, 40)
+    notifFrame.Position = UDim2.new(0.5, -100, 0.1, 0)
+    notifFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    notifFrame.BackgroundTransparency = 0.2
+    notifFrame.BorderSizePixel = 0
+    notifFrame.ZIndex = 10
+    notifFrame.Parent = gui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = notifFrame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 1.5
+    stroke.Color = Color3.fromRGB(255, 100, 100)
+    stroke.Parent = notifFrame
+    
+    local texto = Instance.new("TextLabel")
+    texto.Size = UDim2.new(1, -10, 1, 0)
+    texto.Position = UDim2.new(0, 5, 0, 0)
+    texto.BackgroundTransparency = 1
+    texto.Text = mensagem
+    texto.TextColor3 = Color3.fromRGB(255, 255, 255)
+    texto.TextSize = 14
+    texto.Font = Enum.Font.GothamSemibold
+    texto.TextXAlignment = Enum.TextXAlignment.Center
+    texto.ZIndex = 11
+    texto.Parent = notifFrame
+    
+    -- Animação de entrada
+    notifFrame.Position = UDim2.new(0.5, -100, -0.2, 0)
+    local entrada = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {
+        Position = UDim2.new(0.5, -100, 0.05, 0)
+    })
+    entrada:Play()
+    
+    -- Remover após duração
+    task.wait(duracao)
+    local saida = TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, -100, -0.2, 0)
+    })
+    saida:Play()
+    saida.Completed:Wait()
+    notifFrame:Destroy()
+end
+
+-- Frame principal do Hub
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 260, 0, 380)
+frame.Position = UDim2.new(0.5, -130, 0.5, -190)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BackgroundTransparency = 0.05
+frame.BorderSizePixel = 0
+frame.ClipsDescendants = true
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = frame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(100, 100, 255)
+stroke.Parent = frame
+
+-- Gradiente RGB na borda
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 45
+gradient.Parent = stroke
+
+-- Animação RGB
+task.spawn(function()
+    while gui and gui.Parent do
+        gradient.Rotation += 2
+        task.wait(0.03)
+    end
+end)
+
+-- Título do Hub
+local titulo = Instance.new("TextLabel")
+titulo.Size = UDim2.new(1, 0, 0, 40)
+titulo.Position = UDim2.new(0, 0, 0, 0)
+titulo.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+titulo.BackgroundTransparency = 0.2
+titulo.Text = "🔥 LUCKY HUB"
+titulo.TextColor3 = Color3.fromRGB(255, 255, 255)
+titulo.TextSize = 18
+titulo.Font = Enum.Font.GothamBlack
+titulo.Parent = frame
+
+local tituloCorner = Instance.new("UICorner")
+tituloCorner.CornerRadius = UDim.new(0, 16)
+tituloCorner.Parent = titulo
+
+-- Subtítulo com crédito ao criador
+local subTitulo = Instance.new("TextLabel")
+subTitulo.Size = UDim2.new(1, 0, 0, 18)
+subTitulo.Position = UDim2.new(0, 0, 0, 38)
+subTitulo.BackgroundTransparency = 1
+subTitulo.Text = "by Elso ADM"
+subTitulo.TextColor3 = Color3.fromRGB(255, 200, 100)
+subTitulo.TextSize = 11
+subTitulo.Font = Enum.Font.GothamLight
+subTitulo.TextXAlignment = Enum.TextXAlignment.Center
+subTitulo.Parent = titulo
+
+-- Botão Minimizar
+local minimizarBtn = Instance.new("TextButton")
+minimizarBtn.Size = UDim2.new(0, 28, 0, 28)
+minimizarBtn.Position = UDim2.new(1, -35, 0, 6)
+minimizarBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+minimizarBtn.Text = "−"
+minimizarBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizarBtn.TextSize = 20
+minimizarBtn.Font = Enum.Font.GothamBold
+minimizarBtn.Parent = titulo
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 8)
+btnCorner.Parent = minimizarBtn
+
+-- Avatar do jogador
+local avatar = Instance.new("ImageLabel")
+avatar.Size = UDim2.new(0, 50, 0, 50)
+avatar.Position = UDim2.new(0.5, -25, 0, 65)
+avatar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+avatar.Parent = frame
+
+local avatarCorner = Instance.new("UICorner")
+avatarCorner.CornerRadius = UDim.new(1, 0)
+avatarCorner.Parent = avatar
+
+-- Carregar avatar
+task.spawn(function()
+    local userId = player.UserId
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+    avatar.Image = content
+end)
+
+-- Nome do jogador
+local nomeJogador = Instance.new("TextLabel")
+nomeJogador.Size = UDim2.new(1, 0, 0, 20)
+nomeJogador.Position = UDim2.new(0, 0, 0, 120)
+nomeJogador.BackgroundTransparency = 1
+nomeJogador.Text = player.Name
+nomeJogador.TextColor3 = Color3.fromRGB(200, 200, 255)
+nomeJogador.TextSize = 14
+nomeJogador.Font = Enum.Font.GothamBold
+nomeJogador.Parent = frame
+
+-- Linha separadora
+local linha = Instance.new("Frame")
+linha.Size = UDim2.new(0.9, 0, 0, 1)
+linha.Position = UDim2.new(0.05, 0, 0, 148)
+linha.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+linha.BorderSizePixel = 0
+linha.Parent = frame
+
+-- Seção de Botões
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, 0, 0.52, 0)
+scrollFrame.Position = UDim2.new(0, 0, 0, 158)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 180)
+scrollFrame.ScrollBarThickness = 3
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 255)
+scrollFrame.Parent = frame
+
+local uiList = Instance.new("UIListLayout")
+uiList.Padding = UDim.new(0, 6)
+uiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+uiList.Parent = scrollFrame
+
+-- Função para criar botões estilizados
+local function criarBotao(texto)
+    local botao = Instance.new("TextButton")
+    botao.Size = UDim2.new(0.85, 0, 0, 35)
+    botao.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    botao.Text = texto
+    botao.TextColor3 = Color3.fromRGB(255, 255, 255)
+    botao.TextSize = 14
+    botao.Font = Enum.Font.GothamSemibold
+    botao.Parent = scrollFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = botao
+    
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Thickness = 1
+    btnStroke.Color = Color3.fromRGB(80, 80, 80)
+    btnStroke.Parent = botao
+    
+    -- Efeito hover
+    botao.MouseEnter:Connect(function()
+        TweenService:Create(botao, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        }):Play()
+    end)
+    
+    botao.MouseLeave:Connect(function()
+        TweenService:Create(botao, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        }):Play()
+    end)
+    
+    return botao
+end
+
+-- Criar botões
+local estiloBtn = criarBotao("💫 Estilo")
+local habilidadeBtn = criarBotao("⚡ Habilidade")
+local yenBtn = criarBotao("💰 Yen")
+
+-- Rodapé com créditos completos
+local rodape = Instance.new("TextLabel")
+rodape.Size = UDim2.new(1, 0, 0, 30)
+rodape.Position = UDim2.new(0, 0, 1, -30)
+rodape.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+rodape.BackgroundTransparency = 0.2
+rodape.Text = "Store Lucky\nby Elso ADM"
+rodape.TextColor3 = Color3.fromRGB(150, 150, 150)
+rodape.TextSize = 10
+rodape.Font = Enum.Font.Gotham
+rodape.Parent = frame
+
+-- ================================================================
+-- ÍCONE MINIMIZADO (Quadrado arredondado flutuante)
+-- ================================================================
+local iconeMinimizado = Instance.new("TextButton")
+iconeMinimizado.Size = UDim2.new(0, 50, 0, 50)
+iconeMinimizado.Position = UDim2.new(0.5, -25, 0.8, 0)
+iconeMinimizado.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+iconeMinimizado.BackgroundTransparency = 0.1
+iconeMinimizado.BorderSizePixel = 0
+iconeMinimizado.Text = "🔥"
+iconeMinimizado.TextColor3 = Color3.fromRGB(255, 255, 255)
+iconeMinimizado.TextSize = 28
+iconeMinimizado.Font = Enum.Font.GothamBold
+iconeMinimizado.Visible = false
+iconeMinimizado.ZIndex = 10
+iconeMinimizado.Parent = gui
+
+local iconeCorner = Instance.new("UICorner")
+iconeCorner.CornerRadius = UDim.new(0, 12)
+iconeCorner.Parent = iconeMinimizado
+
+local iconeStroke = Instance.new("UIStroke")
+iconeStroke.Thickness = 2.5
+iconeStroke.Color = Color3.fromRGB(100, 100, 255)
+iconeStroke.Parent = iconeMinimizado
+
+local iconeGradient = Instance.new("UIGradient")
+iconeGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+}
+iconeGradient.Rotation = 45
+iconeGradient.Parent = iconeStroke
+
+-- Animação RGB para o ícone minimizado
+task.spawn(function()
+    while gui and gui.Parent do
+        iconeGradient.Rotation += 2
+        task.wait(0.03)
+    end
+end)
+
+-- Sistema de Drag (PC e Mobile)
+local dragging = false
+local dragInput, dragStart, startPos
+
+local function atualizarDrag(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+titulo.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titulo.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        atualizarDrag(input)
+    end
+end)
+
+-- Sistema de Drag para o ícone minimizado
+local iconeDragging = false
+local iconeDragInput, iconeDragStart, iconeStartPos
+
+iconeMinimizado.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        iconeDragging = true
+        iconeDragStart = input.Position
+        iconeStartPos = iconeMinimizado.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                iconeDragging = false
+            end
+        end)
+    end
+end)
+
+iconeMinimizado.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        iconeDragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == iconeDragInput and iconeDragging then
+        local delta = input.Position - iconeDragStart
+        iconeMinimizado.Position = UDim2.new(
+            iconeStartPos.X.Scale,
+            iconeStartPos.X.Offset + delta.X,
+            iconeStartPos.Y.Scale,
+            iconeStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Sistema de Minimizar/Maximizar (agora como ícone quadrado arredondado)
+local minimizado = false
+local tamanhoOriginal = frame.Size
+local posicaoOriginal = frame.Position
+
+-- Função para atualizar o estado minimizado
+local function setMinimizado(estado)
+    minimizado = estado
+    
+    if minimizado then
+        -- Salvar posição atual do frame
+        posicaoOriginal = frame.Position
+        
+        -- Esconder frame principal com animação
+        local tweenEsconder = TweenService:Create(frame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            BackgroundTransparency = 1
+        })
+        tweenEsconder:Play()
+        tweenEsconder.Completed:Wait()
+        frame.Visible = false
+        
+        -- Mostrar ícone minimizado com animação
+        iconeMinimizado.Visible = true
+        iconeMinimizado.Position = UDim2.new(posicaoOriginal.X.Scale, posicaoOriginal.X.Offset, posicaoOriginal.Y.Scale, posicaoOriginal.Y.Offset)
+        
+        local tweenIcone = TweenService:Create(iconeMinimizado, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0, 50, 0, 50)
+        })
+        tweenIcone:Play()
+        
+        notify("🔥 Hub minimizado", 1.5)
+    else
+        -- Esconder ícone com animação
+        local tweenEsconderIcone = TweenService:Create(iconeMinimizado, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 0, 0, 0)
+        })
+        tweenEsconderIcone:Play()
+        tweenEsconderIcone.Completed:Wait()
+        iconeMinimizado.Visible = false
+        
+        -- Mostrar frame principal
+        frame.Visible = true
+        frame.BackgroundTransparency = 0.05
+        frame.Size = UDim2.new(0, 0, 0, 0)
+        frame.Position = iconeMinimizado.Position
+        
+        local tweenMostrar = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            Size = tamanhoOriginal,
+            Position = posicaoOriginal
+        })
+        tweenMostrar:Play()
+        
+        notify("🔥 Hub expandido", 1.5)
+    end
+end
+
+minimizarBtn.MouseButton1Click:Connect(function()
+    setMinimizado(true)
+end)
+
+iconeMinimizado.MouseButton1Click:Connect(function()
+    setMinimizado(false)
+end)
+
+-- ================================================================
+-- CONEXÃO COM REMOTE
+-- ================================================================
+
+-- Tentar encontrar o Remote (com segurança)
+local remote = nil
+pcall(function()
+    remote = game:GetService("ReplicatedStorage")
+        :WaitForChild("Packages")
+        :WaitForChild("_Index")
+        :WaitForChild("sleitnick_knit@1.7.0")
+        :WaitForChild("knit")
+        :WaitForChild("Services")
+        :WaitForChild("SeasonService")
+        :WaitForChild("RF")
+        :WaitForChild("RequestRankedReward")
+end)
+
+-- Verificar se o remote existe
+if not remote then
+    warn("⚠️ Remote 'RequestRankedReward' não encontrado!")
+else
+    print("✅ Remote encontrado com sucesso!")
+end
+
+-- ================================================================
+-- ⚙️ HABILIDADE
+-- ================================================================
+habilidadeBtn.MouseButton1Click:Connect(function()
+    if not remote then
+        notify("❌ Remote não encontrado!", 2)
+        return
+    end
+    
+    habilidadeOn = not habilidadeOn
+    
+    habilidadeBtn.BackgroundColor3 = habilidadeOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(35, 35, 35)
+    notify(habilidadeOn and "⚡ Habilidade Ativada" or "⚡ Habilidade Desativada")
+    
+    if habilidadeOn then
+        task.spawn(function()
+            while habilidadeOn and gui and gui.Parent do
+                pcall(function()
+                    remote:InvokeServer(4)
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+-- ================================================================
+-- 🎯 ESTILO
+-- ================================================================
+estiloBtn.MouseButton1Click:Connect(function()
+    if not remote then
+        notify("❌ Remote não encontrado!", 2)
+        return
+    end
+    
+    estiloOn = not estiloOn
+    
+    estiloBtn.BackgroundColor3 = estiloOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(35, 35, 35)
+    notify(estiloOn and "💫 Estilo Ativado" or "💫 Estilo Desativado")
+    
+    if estiloOn then
+        task.spawn(function()
+            while estiloOn and gui and gui.Parent do
+                pcall(function()
+                    remote:InvokeServer(1)
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+-- ================================================================
+-- 💰 YEN
+-- ================================================================
+yenBtn.MouseButton1Click:Connect(function()
+    if not remote then
+        notify("❌ Remote não encontrado!", 2)
+        return
+    end
+    
+    yenOn = not yenOn
+    
+    yenBtn.BackgroundColor3 = yenOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(35, 35, 35)
+    notify(yenOn and "💰 Yen Ativado" or "💰 Yen Desativado")
+    
+    if yenOn then
+        task.spawn(function()
+            while yenOn and gui and gui.Parent do
+                pcall(function()
+                    remote:InvokeServer(2)
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+-- Notificação inicial personalizada
+notify("🎮 Lucky Hub by Elso ADM", 3)
+
+print("✅ Lucky Hub by Elso ADM carregado com sucesso!")
+print("📱 Hub otimizado para mobile e PC")
+print("👑 Criado por Elso ADM - Store Lucky")
